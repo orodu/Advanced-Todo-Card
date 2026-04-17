@@ -1,0 +1,195 @@
+/*
+ * Basic reset to remove default margins and set a legible font.
+ */
+html,
+body {
+  padding: 0;
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  line-height: 1.4;
+  background-color: #f0f2f5;
+}
+
+/* Center the card in the viewport */
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+/* Card layout */
+.todo-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 1.2rem 1.5rem;
+  width: 100%;
+  max-width: 500px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+/* Header section styles */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.8rem;
+}
+
+.card-header-left h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #0b2545;
+  line-height: 1.2;
+}
+
+.card-header-left p {
+  margin: 0.25rem 0 0;
+  font-size: 0.9rem;
+  color: #4a5568;
+}
+
+/* Buttons for edit and delete */
+.icon-button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1rem;
+  padding: 0.25rem;
+  margin-left: 0.4rem;
+  color: #64748b;
+  transition: color 0.2s ease;
+}
+
+.icon-button:hover,
+.icon-button:focus {
+  color: #0b2545;
+}
+
+/* Meta section styles */
+.card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+  color: #4a5568;
+}
+
+.card-meta .label {
+  font-weight: 500;
+  color: #0b2545;
+  margin-right: 0.25rem;
+}
+
+.card-meta .value {
+  font-weight: 400;
+}
+
+.priority-text {
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  background-color: #fdecea; /* light red background for high priority */
+  color: #c62828;
+  font-weight: 500;
+}
+
+.status-text {
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  background-color: #fef9e7;
+  color: #b0780f;
+  font-weight: 500;
+}
+
+/* Tags container */
+/* Tags list */
+.tags-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.tags-list .tag {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.tag-work {
+  background-color: #5c7cfa;
+}
+.tag-urgent {
+  background-color: #e03131;
+}
+.tag-design {
+  background-color: #2f9e44;
+}
+
+/* Footer section */
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.complete-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #0b2545;
+}
+
+.complete-label input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
+  accent-color: #5c7cfa;
+}
+
+/* Completed state: strike through title and dim meta */
+.todo-card.completed .todo-title,
+.todo-card.completed .todo-description {
+  text-decoration: line-through;
+  color: #a0aec0;
+}
+
+.todo-card.completed .status-text {
+  background-color: #edf2f7;
+  color: #718096;
+}
+
+.todo-card.completed #remaining-time {
+  color: #718096;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .todo-card {
+    padding: 1rem;
+    border-radius: 8px;
+  }
+  .card-header-left h2 {
+    font-size: 1.2rem;
+  }
+  .card-header-left p {
+    font-size: 0.8rem;
+  }
+  .card-meta {
+    font-size: 0.8rem;
+  }
+  .complete-label {
+    font-size: 0.8rem;
+  }
+}
