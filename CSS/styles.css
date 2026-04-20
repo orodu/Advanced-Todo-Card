@@ -1,0 +1,19 @@
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        
+        .todo-card { transition: all 0.3s ease; }
+        .status-done { opacity: 0.6; }
+        .status-done .todo-title { text-decoration: line-through; }
+        
+        .priority-high-accent { border-left: 6px solid #ef4444; }
+        .priority-medium-accent { border-left: 6px solid #f59e0b; }
+        .priority-low-accent { border-left: 6px solid #10b981; }
+
+        .overdue-pulse {
+            animation: pulse-red 2s infinite;
+        }
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }

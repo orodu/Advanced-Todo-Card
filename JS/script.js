@@ -1,0 +1,216 @@
+        // Initial State
+        let state = {
+            isEditing: false,
+            isExpanded: false,
+            todo: {
+                title: "Complete Stage 1a Frontend Wizards Task",
+                description: "Extend the Stage 0 Todo Card into a more interactive, stateful, and app-like component. This includes adding edit forms, status transitions, priority levels, and accessibility patterns like ARIA labels and keyboard flow.",
+                status: "In Progress", // Pending, In Progress, Done
+                priority: "High",     // Low, Medium, High
+                dueDate: "2026-04-20"
+            }
+        };
+
+        const root = document.getElementById('root');
+
+        function setState(newState) {
+            state = { ...state, ...newState };
+            render();
+        }
+
+        function isOverdue(dateStr) {
+            if (!dateStr) return false;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const due = new Date(dateStr);
+            return due < today && state.todo.status !== "Done";
+        }
+
+        function render() {
+            const overdue = isOverdue(state.todo.dueDate);
+            const descLong = state.todo.description.length > 100;
+            
+            let html = "";
+
+            if (state.isEditing) {
+                // EDIT MODE
+                html = `
+                <form id="edit-form" class="bg-white rounded-xl shadow-xl p-6 space-y-4 todo-card" data-testid="test-todo-edit-form">
+                    <h2 class="text-xl font-bold text-gray-800">Edit Task</h2>
+                    
+                    <div class="flex flex-col">
+                        <label for="edit-title" class="text-sm font-semibold text-gray-600 mb-1">Title</label>
+                        <input type="text" id="edit-title" value="${state.todo.title}" 
+                            class="border rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none" 
+                            data-testid="test-todo-edit-title-input" required>
+                    </div>
+
+                    <div class="flex flex-col">
+                        <label for="edit-desc" class="text-sm font-semibold text-gray-600 mb-1">Description</label>
+                        <textarea id="edit-desc" rows="3" 
+                            class="border rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none"
+                            data-testid="test-todo-edit-description-input">${state.todo.description}</textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="flex flex-col">
+                            <label for="edit-priority" class="text-sm font-semibold text-gray-600 mb-1">Priority</label>
+                            <select id="edit-priority" class="border rounded-lg p-2 outline-none" data-testid="test-todo-edit-priority-select">
+                                <option value="Low" ${state.todo.priority === 'Low' ? 'selected' : ''}>Low</option>
+                                <option value="Medium" ${state.todo.priority === 'Medium' ? 'selected' : ''}>Medium</option>
+                                <option value="High" ${state.todo.priority === 'High' ? 'selected' : ''}>High</option>
+                            </select>
+                        </div>
+                        <div class="flex flex-col">
+                            <label for="edit-due" class="text-sm font-semibold text-gray-600 mb-1">Due Date</label>
+                            <input type="date" id="edit-due" value="${state.todo.dueDate}" 
+                                class="border rounded-lg p-2 outline-none" data-testid="test-todo-edit-due-date-input">
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end gap-3 pt-4 border-t">
+                        <button type="button" onclick="cancelEdit()" 
+                            class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                            data-testid="test-todo-cancel-button">
+                            Cancel
+                        </button>
+                        <button type="submit" 
+                            class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-lg transition-colors"
+                            data-testid="test-todo-save-button">
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+                `;
+            } else {
+                // VIEW MODE
+                const priorityClass = `priority-${state.todo.priority.toLowerCase()}-accent`;
+                const statusDone = state.todo.status === "Done";
+                const overdueStyle = overdue ? 'bg-red-50 border-red-200 overdue-pulse' : 'bg-white';
+
+                html = `
+                <div class="todo-card ${priorityClass} ${statusDone ? 'status-done' : ''} ${overdueStyle} rounded-xl shadow-lg overflow-hidden flex flex-col md:flex-row">
+                    
+                    <div class="p-6 flex-1">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="flex flex-col">
+                                <span id="priority-indicator" data-testid="test-todo-priority-indicator" class="text-[10px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full w-max 
+                                    ${state.todo.priority === 'High' ? 'bg-red-100 text-red-700' : 
+                                      state.todo.priority === 'Medium' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}">
+                                    ${state.todo.priority} Priority
+                                </span>
+                                <h1 class="todo-title text-2xl font-bold mt-2 text-gray-900">${state.todo.title}</h1>
+                            </div>
+                            
+                            <div class="flex gap-2">
+                                <button onclick="startEdit()" title="Edit Task" class="p-2 text-gray-400 hover:text-blue-600 rounded-full hover:bg-blue-50 transition-colors">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </button>
+                                <button onclick="deleteTask()" title="Delete Task" class="p-2 text-gray-400 hover:text-red-600 rounded-full hover:bg-red-50 transition-colors">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="todo-collapsible" class="mb-6" data-testid="test-todo-collapsible-section">
+                            <p class="text-gray-600 leading-relaxed ${state.isExpanded ? '' : 'line-clamp-2'}">
+                                ${state.todo.description}
+                            </p>
+                            ${descLong ? `
+                                <button onclick="toggleExpand()" aria-expanded="${state.isExpanded}" aria-controls="todo-collapsible"
+                                    class="text-blue-600 font-semibold text-sm mt-1 hover:underline flex items-center gap-1"
+                                    data-testid="test-todo-expand-toggle">
+                                    ${state.isExpanded ? 'Show Less <i class="fa-solid fa-chevron-up"></i>' : 'Read More <i class="fa-solid fa-chevron-down"></i>'}
+                                </button>
+                            ` : ''}
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center border-t pt-4">
+                            <div class="flex items-center gap-3">
+                                <label for="status-control" class="sr-only">Change Status</label>
+                                <div class="relative w-full">
+                                    <select id="status-control" onchange="updateStatus(this.value)" 
+                                        class="w-full bg-gray-50 border border-gray-200 rounded-lg p-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        data-testid="test-todo-status-control">
+                                        <option value="Pending" ${state.todo.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                                        <option value="In Progress" ${state.todo.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+                                        <option value="Done" ${state.todo.status === 'Done' ? 'selected' : ''}>Done</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-end text-sm font-medium ${overdue ? 'text-red-600' : 'text-gray-500'}" 
+                                 aria-live="polite">
+                                <i class="fa-regular fa-clock mr-2"></i>
+                                <span>Due: ${new Date(state.todo.dueDate).toLocaleDateString()}</span>
+                                ${overdue ? `
+                                    <span class="ml-2 bg-red-600 text-white text-[10px] px-2 py-0.5 rounded animate-pulse" 
+                                          data-testid="test-todo-overdue-indicator">
+                                        OVERDUE
+                                    </span>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                `;
+            }
+
+            root.innerHTML = html;
+
+            // Re-attach form listener if in edit mode
+            if (state.isEditing) {
+                document.getElementById('edit-form').addEventListener('submit', handleSave);
+            }
+        }
+
+        // --- Interaction Logic ---
+
+        function startEdit() {
+            setState({ isEditing: true });
+        }
+
+        function cancelEdit() {
+            setState({ isEditing: false });
+        }
+
+        function handleSave(e) {
+            e.preventDefault();
+            const updatedTodo = {
+                title: document.getElementById('edit-title').value,
+                description: document.getElementById('edit-desc').value,
+                priority: document.getElementById('edit-priority').value,
+                dueDate: document.getElementById('edit-due').value,
+                status: state.todo.status // Keep status same unless toggle in view
+            };
+            setState({ todo: updatedTodo, isEditing: false });
+        }
+
+        function updateStatus(newStatus) {
+            const updatedTodo = { ...state.todo, status: newStatus };
+            setState({ todo: updatedTodo });
+        }
+
+        function toggleExpand() {
+            setState({ isExpanded: !state.isExpanded });
+        }
+
+        function deleteTask() {
+            if (confirm("Are you sure you want to delete this task?")) {
+                root.innerHTML = `
+                    <div class="bg-white p-8 rounded-xl shadow-lg text-center">
+                        <i class="fa-solid fa-circle-check text-green-500 text-5xl mb-4"></i>
+                        <h2 class="text-xl font-bold">Task Removed</h2>
+                        <button onclick="location.reload()" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg">Reset Demo</button>
+                    </div>
+                `;
+            }
+        }
+
+        // Initial Render
+        window.onload = render;
+
+        // Auto-check for overdue every minute (dynamic time handling)
+        setInterval(() => {
+            render();
+        }, 60000);
